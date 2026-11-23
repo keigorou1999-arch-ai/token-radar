@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Launch Radar: pre-token protocols ranked by implied value</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<!--
+  How this page gets its numbers. ../data.js is written by main.ts and holds the sealed DefiLlama
+  snapshot unchanged (758 protocols, ten fields each, and the 40-slug watchlist) plus the values
+  main.ts wrote to board.json. Nothing is precomputed: valueModel.js scores every protocol in the
+  browser, farmPlan.js writes each plan, and app.js checks the page's values against board.json.
+  One file, one job: format.js (numbers), valueModel.js (implied value), farmPlan.js (farm steps),
+  filters.js (view, filters, sort), boardTable.js (the board), detailView.js (one protocol), app.js (wiring).
+-->
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><span class="ping"></span>Token Launch Radar<span class="meta" id="snapshot-meta"></span></div>
+    <div class="hero">
+      <div>
+        <h1 id="headline"></h1>
+        <p class="formula"><b>Implied value</b> = TVL <i>&times;</i> peer multiple <i>&times;</i> size factor <i>&times;</i> 7-day growth factor <i>&times;</i> no-token tenure factor</p>
+        <p class="lede" id="model-note"></p>
+      </div>
+      <dl class="stats" id="stats"></dl>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="board">
+  <nav class="views" id="views" aria-label="Token status"></nav>
+  <form class="filters" onsubmit="return false">
+    <label>Search<input id="filter-q" type="search" placeholder="Name, category or chain" autocomplete="off"></label>
+    <label>Category<select id="filter-category"></select></label>
+    <label>Chain<select id="filter-chain"></select></label>
+    <p class="shown" id="shown" aria-live="polite"></p>
+  </form>
+  <div class="tablebox">
+    <table>
+      <thead><tr id="board-head"></tr></thead>
+      <tbody id="board-rows"></tbody>
+    </table>
+  </div>
+</main>
+
+<main class="wrap" id="detail" hidden></main>
+
+<footer class="wrap foot">Implied value is this model's claim, not a price and not a forecast that a token will be issued. DefiLlama's record is not proof: a protocol that records no token may still have one. Gas and fee figures in the farm plans are estimates.</footer>
+
+<script src="../data.js"></script>
+<script src="format.js"></script>
+<script src="valueModel.js"></script>
+<script src="farmPlan.js"></script>
+<script src="filters.js"></script>
+<script src="boardTable.js"></script>
+<script src="detailView.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
