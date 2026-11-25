@@ -60,7 +60,9 @@ const board: BoardRow[] = radar.ranked.map((r: any) => ({
   tvl_usd: r.tvl_usd,
   change_7d: r.change_7d,
   days_without_token: r.days,
-  model: { peer_multiple: r.peer.multiple, peers: r.peer.n, size_factor: r.size, growth_factor: r.growth, tenure_factor: r.tenure },
+  model: { peer_multiple: r.peer.multiple, peers: r.peer.n, category_weight: r.peer.weight, size_factor: r.size, growth_factor: r.growth, tenure_factor: r.tenure },
+  rank_drivers: r.why,
+  farm_plan: farmPlan(r).label,
   farm_steps: farmPlan(r).steps.map(stepText),
 }));
 

@@ -16,8 +16,8 @@ function renderHeader() {
   document.getElementById('snapshot-meta').textContent = `DefiLlama snapshot of ${radar.asOf}, ${radar.rows.length} protocols`;
   document.getElementById('headline').textContent = `${ranked} protocols that record no token, ranked by implied value`;
   document.getElementById('model-note').textContent =
-    `Measured on this snapshot: the ${m.peers} comparable protocols whose token already trades have a median market cap of ${m.allMedian.toFixed(2)}x TVL ` +
-    `and are paid ${Math.round(100 * (1 - 2 ** m.sizeBeta))}% less per dollar each time TVL doubles. Run on those ${m.peers}, the model lands within 3x of the real market cap for ${Math.round(100 * radar.check.within3x)}%. ` +
+    `The ${m.peers} comparable protocols whose token already trades are worth a median ${m.allMedian.toFixed(2)}x TVL, and ${Math.round(100 * (1 - 2 ** m.sizeBeta))}% less per dollar each time TVL doubles. ` +
+    `A category's own median counts n/(n+${m.shrink}) for its n peers, the weight that predicts best when each peer is valued without itself: ${Math.round(100 * radar.check.within3x)}% then land within 3x of their real market cap. ` +
     `Growth (-20% to +40%) and tenure (-25% to 0) are stated assumptions.`;
   const stats = [
     ['Watchlist covered', `${watch} / ${window.SNAPSHOT.watchlist.length}`, 'every slug is ranked'],

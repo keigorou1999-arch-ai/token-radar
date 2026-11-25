@@ -13,6 +13,12 @@ function valueBar(value, largest) {
   return `<span class="bar"><i style="width:${Math.round(100 * clamp(Math.sqrt(value / largest), 0.03, 1))}%"></i></span>`;
 }
 
+/** The rank's two drivers from rankDrivers: what lifts the row and what holds it back. */
+function driverMarks(r) {
+  const why = r.why || {};
+  return (why.lift ? `<span class="up">&#9650; ${why.lift}</span>` : '') + (why.drag ? ` <span class="down">&#9660; ${why.drag}</span>` : '') || 'typical on every factor';
+}
+
 const COLUMNS = {
   rank: { label: '#', sort: (r) => r.rank, cell: (r) => r.rank, cls: 'num rank' },
   name: { label: 'Protocol', sort: (r) => r.name.toLowerCase(), cls: 'who',
@@ -23,11 +29,11 @@ const COLUMNS = {
   change: { label: '7d TVL', sort: (r) => r.change_7d ?? -Infinity, cell: (r) => signed(r.change_7d), cls: 'num', desc: true },
   days: { label: 'No token for', sort: (r) => r.days ?? -1, cell: (r) => tenure(r.days), cls: 'num', desc: true },
   multiple: { label: 'Peer multiple', sort: (r) => r.peer.multiple, cls: 'num', desc: true,
-    cell: (r) => `${r.peer.multiple.toFixed(2)}x <small>${r.peer.n} peer${r.peer.n === 1 ? '' : 's'}</small>` },
-  value: { label: 'Implied value', sort: (r) => r.value, cls: 'num value', desc: true,
-    cell: (r, largest) => `${valueBar(r.value, largest)}<b>${money(r.value)}</b>` },
-  farm: { label: 'Farm plan', sort: (r) => planOf(r).fees,
-    cell: (r) => { const f = planOf(r); return `${dollars(f.size)} on ${escapeHtml(f.chain)} <small>${f.steps.length} steps, ~${dollars(f.fees)} fees, ${f.hold} days</small>`; }, cls: 'farm' },
+    cell: (r) => `${r.peer.multiple.toFixed(2)}x <small>${r.peer.n} peer${r.peer.n === 1 ? '' : 's'}, ${Math.round(100 * (1 - r.peer.weight))}% market</small>` },
+  value: { label: 'Implied value, drivers', sort: (r) => r.value, cls: 'num value', desc: true,
+    cell: (r, largest) => `${valueBar(r.value, largest)}<b>${money(r.value)}</b><small>${driverMarks(r)}</small>` },
+  farm: { label: 'Farm plan', sort: (r) => planOf(r).label,
+    cell: (r) => { const f = planOf(r); return `<b>${f.label}</b>, ${f.steps.length} steps <small>${dollars(f.size)} on ${escapeHtml(f.chain)}, ~${dollars(f.fees)} fees, ${f.hold} d</small>`; }, cls: 'farm' },
   symbol: { label: 'Token', sort: (r) => r.symbol || '', cell: (r) => escapeHtml(r.symbol || 'on record') },
   mcap: { label: 'Market cap', sort: (r) => r.mcap_usd ?? -1, cell: (r) => (r.mcap_usd ? `<b>${money(r.mcap_usd)}</b>` : '<small>not reported</small>'), cls: 'num', desc: true },
   ratio: { label: 'Market cap / TVL', sort: (r) => (r.mcap_usd ? r.mcap_usd / r.tvl_usd : -1), cell: (r) => (r.mcap_usd ? (r.mcap_usd / r.tvl_usd).toFixed(2) + 'x' : ''), cls: 'num', desc: true },

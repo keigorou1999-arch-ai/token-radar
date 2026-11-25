@@ -4,12 +4,12 @@
 /** The five lines of the valuation: each factor, where it came from, and the running value after it. */
 function valuationSteps(r, market) {
   const peerNote = r.peer.n
-    ? `${r.peer.n} ${r.category} peer${r.peer.n === 1 ? '' : 's'}, median ${r.peer.categoryMedian.toFixed(2)}x, weight ${Math.round(r.peer.weight * 100)}% against the market's ${market.allMedian.toFixed(2)}x`
+    ? `${r.peer.n} ${r.category} peer${r.peer.n === 1 ? '' : 's'}, median ${r.peer.categoryMedian.toFixed(2)}x, pulled ${Math.round(100 * (1 - r.peer.weight))}% toward the market's ${market.allMedian.toFixed(2)}x`
     : `no ${r.category || 'category'} peer, so the median of all ${market.peers} peers`;
   const steps = [
     ['TVL', 'tvl_usd', 'as the snapshot gives it', null],
-    ['Peer multiple', 'peerMultiple', peerNote, r.peer.multiple],
-    ['Size factor', 'sizeFactor', `TVL is ${(r.tvl_usd / market.refTvl).toFixed(1)}x the median peer's ${money(market.refTvl)}; fitted beta ${market.sizeBeta}`, r.size],
+    ['Peer multiple', 'shrinkPeerMultiple', peerNote, r.peer.multiple],
+    ['Size factor', 'sizeFactor', `${(r.tvl_usd / market.refTvl).toFixed(1)}x the median peer's ${money(market.refTvl)} TVL; fitted beta ${market.sizeBeta}`, r.size],
     ['Growth factor', 'growthFactor', `7-day TVL change ${percent(r.change_7d)}, at half weight`, r.growth],
     ['Tenure factor', 'tenureFactor', r.days == null ? `no start date, so the median run of ${market.medianTenure} days` : `${r.days} days with no token on record; full at ${MODEL.tenureFullDays}`, r.tenure],
   ];
@@ -31,8 +31,8 @@ function valuationTable(r, market) {
 /** The honest width of the estimate, from how the model does on protocols whose market cap is known. */
 function rangeNote(r, radar) {
   const { low, high } = radar.check;
-  return `<p class="note"><b>Likely range ${money(r.value * low)} to ${money(r.value * high)}.</b> Run on the ${radar.market.peers} peers whose token trades, ` +
-    `half of the real market caps fall between ${low.toFixed(2)}x and ${high.toFixed(2)}x of the model's value` +
+  return `<p class="note"><b>Likely range ${money(r.value * low)} to ${money(r.value * high)}.</b> Valued by the model fitted without them, ` +
+    `half of the ${radar.market.peers} trading peers have a real market cap between ${low.toFixed(2)}x and ${high.toFixed(2)}x of the model's value` +
     (r.mcap_usd ? `; this one's is ${(r.mcap_usd / r.value).toFixed(2)}x.` : '.') + '</p>';
 }
 
@@ -42,12 +42,12 @@ function peerTable(r, market) {
   if (!peers.length) return `<p class="note">No ${escapeHtml(r.category || 'uncategorised')} protocol in the snapshot has a market cap on record, so the multiple is the median of all ${market.peers} trading peers: ${market.allMedian.toFixed(2)}x.</p>`;
   return '<table class="peers"><thead><tr><th>Token already trades</th><th class="num">TVL</th><th class="num">Market cap</th><th class="num">Mcap / TVL</th></tr></thead><tbody>' +
     peers.slice(0, 3).map((p) => `<tr><td>${escapeHtml(p.name)} <small>${escapeHtml(p.symbol || '')}</small></td><td class="num">${money(p.tvl_usd)}</td><td class="num">${money(p.mcap_usd)}</td><td class="num">${(p.mcap_usd / p.tvl_usd).toFixed(2)}x</td></tr>`).join('') +
-    `</tbody></table><p class="note">${peers.length > 3 ? `Largest 3 of ${peers.length} peers. ` : ''}Category median ${r.peer.categoryMedian.toFixed(2)}x; used ${r.peer.multiple.toFixed(2)}x after weighting.</p>`;
+    `</tbody></table><p class="note">${peers.length > 3 ? `Largest 3 of ${peers.length} peers. ` : ''}Category median ${r.peer.categoryMedian.toFixed(2)}x counts ${r.peer.n}/(${r.peer.n}+${market.shrink}) = ${Math.round(100 * r.peer.weight)}% (${market.shrink} is chooseShrinkage's pick), the market's ${market.allMedian.toFixed(2)}x the rest: ${r.peer.multiple.toFixed(2)}x.</p>`;
 }
 
 function planSection(r) {
   const plan = planOf(r);
-  return `<div class="planhead"><h3>Farm plan <small>${plan.steps.length} steps on ${escapeHtml(plan.chain)}</small></h3><dl class="budget"><div><dt>Put in</dt><dd>${dollars(plan.size)}</dd></div><div><dt>Fees and gas</dt><dd>~${dollars(plan.fees)}</dd></div>` +
+  return `<div class="planhead"><h3>Farm plan <small>${plan.label}, ${plan.steps.length} steps</small></h3><dl class="budget"><div><dt>Put in</dt><dd>${dollars(plan.size)}</dd></div><div><dt>Fees and gas</dt><dd>~${dollars(plan.fees)}</dd></div>` +
     `<div><dt>Hands-on</dt><dd>${(plan.minutes / 60).toFixed(1)} h</dd></div><div><dt>Hold</dt><dd>${plan.hold} days</dd></div></dl></div>` +
     '<ol class="steps">' + plan.steps.map((s) => `<li><p>${escapeHtml(s.text)}</p><p class="ct"><span><b>Cost</b> ${escapeHtml(s.cost)}</span><span><b>Time</b> ${escapeHtml(s.time)}</span></p></li>`).join('') + '</ol>';
 }

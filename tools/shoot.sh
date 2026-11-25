@@ -1,5 +1,5 @@
 #!/bin/sh
-# Takes the four screenshots in screenshots/ from a fresh run of main.ts, with headless Chrome at 1440x900.
+# Takes the three screenshots in screenshots/ from a fresh run of main.ts, with headless Chrome at 1440x900.
 # Not run by the grader: it is how the committed screenshots were made. Needs Chrome and Python with Pillow.
 #   tools/shoot.sh ../kit/input/snapshot.json
 set -e
@@ -15,8 +15,7 @@ shot() {
 }
 shot 1-board.png ""
 shot 2-detail.png "#p=onre"
-shot 3-filtered.png "#category=Risk+Curators&chain=Base&sort=change&desc=1"
-shot 4-token-trades.png "#view=trading"
+shot 3-filtered.png "#chain=Monad&sort=change&desc=1"
 
 # Same pixels to within 5/255 a channel, a third of the bytes: a 256-colour palette, no dithering.
 python3 - <<'EOF'
